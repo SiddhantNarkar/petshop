@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contributors - PetShop Dev Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/contributors.css}">
+</head>
+<body class="contributors-page">
+<nav class="navbar">
+    <div class="nav-brand">&#128062; PetShop Dev Portal</div>
+    <div class="nav-user">
+        <div class="nav-links">
+            <a th:href="@{/contributors}">Contributors</a>
+            <a th:href="@{/dashboard}">Dashboard</a>
+        </div>
+        <span th:if="${session.loggedInUser != null}" th:text="${session.loggedInUser.name}">User</span>
+        <a th:if="${session.loggedInUser != null}" th:href="@{/logout}" class="btn-logout">Logout</a>
+    </div>
+</nav>
+
+
+<section class="contributors-section">
+    <div class="contributors-shell">
+        <div class="contributors-section-intro">
+            <p class="contributors-kicker">Team Directory</p>
+            <h2 class="contributors-title">The Contributors</h2>
+            <p class="contributors-lead">
+                Meet the engineers shaping the PetShop platform across customer management,
+                inventory workflows, pet catalog operations, services, and transactions.
+            </p>
+            <div class="contributors-pills">
+                <span class="contributors-pill">5 Contributors</span>
+                <span class="contributors-pill">Backend APIs</span>
+                <span class="contributors-pill">Internal Portal Team</span>
+            </div>
+        </div>
+
+        <div class="contributors-showcase">
+            <div class="hex-row">
+                <div class="contributor-item"
+                     th:each="c,stat : ${contributors}">
+                    <div class="contrib-index" th:text="${#numbers.formatInteger(stat.count, 2)}">01</div>
+                    <div class="hex-wrap">
+                        <img th:src="${c.photoUrl}" th:alt="${c.name}">
+                    </div>
+                    <div class="contrib-body">
+                        <div class="contrib-label">API Owner</div>
+                        <div class="contrib-name" th:text="${c.name}">Contributor Name</div>
+                        <div class="contrib-role" th:text="${c.role}">Backend Developer</div>
+                        <div class="contrib-api" th:text="${c.apiArea}">API Area</div>
+                        <a th:href="@{/contributors/{id}(id=${c.id})}" class="contrib-btn">View Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
