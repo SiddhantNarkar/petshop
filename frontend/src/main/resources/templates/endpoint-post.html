@@ -22,7 +22,7 @@
 <div class="container">
     <div class="breadcrumb">
         <a th:href="@{/contributors}">Contributors</a> &gt;
-        <a th:href="@{/contributors(contributorId=${contributor.id})}" th:text="${contributor.name}">Contributor</a> &gt;
+        <a th:href="@{/contributors/{id}(id=${contributor.id})}" th:text="${contributor.name}">Contributor</a> &gt;
         Endpoint Test
     </div>
 
@@ -36,7 +36,7 @@
             Team-member accounts (sharvari, yatesh, sushmita, tejas, siddhant) can call
             POST and PUT endpoints. Self-registered accounts are limited to GET requests.
         </p>
-        <a th:href="@{/contributors(contributorId=${contributor.id})}"
+        <a th:href="@{/contributors/{id}(id=${contributor.id})}"
            class="btn-secondary"
            style="margin-top:14px; display:inline-block;">
             Back to Showcase
@@ -118,7 +118,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn-primary">Execute Request</button>
-                <a th:href="@{/contributors(contributorId=${contributor.id})}" class="btn-secondary">Back to Showcase</a>
+                <a th:href="@{/contributors/{id}(id=${contributor.id})}" class="btn-secondary">Back to Showcase</a>
             </div>
         </form>
     </section>
