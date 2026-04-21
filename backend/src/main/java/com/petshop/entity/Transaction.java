@@ -1,6 +1,16 @@
 package com.petshop.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 
 @Entity
@@ -12,11 +22,13 @@ public class Transaction {
     @Column(name = "transaction_id")
     private int id;
 
-    @Column(name = "customer_id")
-    private int customerId;
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
 
-    @Column(name = "pet_id")
-    private int petId;
+    @ManyToOne
+    @JoinColumn(name = "pet_id", nullable = false)
+    private Pet pet;
 
     @Column(name = "transaction_date")
     private LocalDate transactionDate;
@@ -33,16 +45,51 @@ public class Transaction {
         Failed
     }
 
-    public int getId()                          { return id; }
-    public void setId(int id)                   { this.id = id; }
-    public int getCustomerId()                  { return customerId; }
-    public void setCustomerId(int customerId)   { this.customerId = customerId; }
-    public int getPetId()                       { return petId; }
-    public void setPetId(int petId)             { this.petId = petId; }
-    public LocalDate getTransactionDate()       { return transactionDate; }
-    public void setTransactionDate(LocalDate d) { this.transactionDate = d; }
-    public double getAmount()                   { return amount; }
-    public void setAmount(double amount)        { this.amount = amount; }
-    public Status getStatus()                   { return status; }
-    public void setStatus(Status status)        { this.status = status; }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Pet getPet() {
+        return pet;
+    }
+
+    public void setPet(Pet pet) {
+        this.pet = pet;
+    }
+
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
+
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

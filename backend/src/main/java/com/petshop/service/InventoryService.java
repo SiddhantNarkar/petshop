@@ -1,7 +1,5 @@
 package com.petshop.service;
 
-
-import com.petshop.dto.EmployeeDTO;
 import com.petshop.entity.Employee;
 import com.petshop.entity.Pet;
 import com.petshop.entity.PetFood;
