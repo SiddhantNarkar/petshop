@@ -21,10 +21,27 @@ public class TransactionDTO {
         this.status = status;
     }
 
-    public int getId()                    { return id; }
-    public int getCustomerId()            { return customerId; }
-    public int getPetId()                 { return petId; }
-    public LocalDate getTransactionDate() { return transactionDate; }
-    public double getAmount()             { return amount; }
-    public String getStatus()             { return status; }
+    public int getId() {
+        return id;
+    }
+
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public int getPetId() {
+        return petId;
+    }
+
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 }

@@ -1,7 +1,5 @@
 package com.petshop.dto;
 
-import com.petshop.dto.AddressDTO;
-
 public class CustomerDTO {
 
     private int id;

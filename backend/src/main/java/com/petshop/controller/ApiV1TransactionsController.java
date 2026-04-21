@@ -1,8 +1,17 @@
 package com.petshop.controller;
 
 import com.petshop.dto.TransactionDTO;
+import com.petshop.dto.TransactionRequestDTO;
+import com.petshop.dto.TransactionStatusUpdateDTO;
 import com.petshop.service.TransactionService;
-import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +27,7 @@ public class ApiV1TransactionsController {
     }
 
     @PostMapping("/orders")
-    public TransactionDTO createOrder(@RequestBody Map<String, Object> payload) {
+    public TransactionDTO createOrder(@Valid @RequestBody TransactionRequestDTO payload) {
         return transactionService.createOrder(payload);
     }
 
@@ -49,7 +58,7 @@ public class ApiV1TransactionsController {
 
     @PutMapping("/{id}/status")
     public TransactionDTO updateStatus(@PathVariable int id,
-                                       @RequestBody Map<String, Object> payload) {
+                                       @Valid @RequestBody TransactionStatusUpdateDTO payload) {
         return transactionService.updateStatus(id, payload);
     }
 }

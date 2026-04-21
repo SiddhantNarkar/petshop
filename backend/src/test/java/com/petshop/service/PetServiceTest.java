@@ -32,7 +32,6 @@ class PetServiceTest {
 
     private Pet samplePet;
     private PetCategory sampleCategory;
-    private PetRequestDTO requestDTO;
 
     @BeforeEach
     void setUp() {
@@ -47,10 +46,6 @@ class PetServiceTest {
         samplePet.setAge(3);
         samplePet.setPrice(15000.0);
         samplePet.setCategory(sampleCategory);
-
-        requestDTO = new PetRequestDTO();
-        // using reflection-style setters if needed
-        // or create constructor if you added one
     }
 
     @Test
@@ -60,7 +55,6 @@ class PetServiceTest {
         when(petRepo.save(any(Pet.class))).thenReturn(samplePet);
 
         // manually set fields (since no setters in DTO)
-        requestDTO = new PetRequestDTO();
         // assuming getters only → use mock-style workaround
         PetRequestDTO req = mock(PetRequestDTO.class);
         when(req.getName()).thenReturn("Buddy");

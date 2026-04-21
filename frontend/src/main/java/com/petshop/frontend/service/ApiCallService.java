@@ -461,7 +461,8 @@ public class ApiCallService {
             case "POST /api/v1/transactions/orders" -> List.of(
                     field("customerId", "number"),
                     field("petId", "number"),
-                    field("amount", "decimal")
+                    field("amount", "decimal"),
+                    field("status", "status")
             );
             case "PUT /api/v1/transactions/{id}/status" -> List.of(
                     field("status", "status")

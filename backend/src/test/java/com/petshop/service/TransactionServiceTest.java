@@ -1,8 +1,14 @@
 package com.petshop.service;
 
 import com.petshop.dto.TransactionDTO;
+import com.petshop.dto.TransactionRequestDTO;
+import com.petshop.dto.TransactionStatusUpdateDTO;
+import com.petshop.entity.Customer;
+import com.petshop.entity.Pet;
 import com.petshop.entity.Transaction;
 import com.petshop.exception.ResourceNotFoundException;
+import com.petshop.repository.CustomerRepository;
+import com.petshop.repository.PetRepository;
 import com.petshop.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,29 +31,41 @@ import static org.mockito.Mockito.*;
 class TransactionServiceTest {
 
     @Mock TransactionRepository repo;
+    @Mock CustomerRepository customerRepository;
+    @Mock PetRepository petRepository;
     @InjectMocks TransactionService transactionService;
 
     private Transaction sampleTransaction;
+    private Customer sampleCustomer;
+    private Pet samplePet;
 
     @BeforeEach
     void setUp() {
+        sampleCustomer = new Customer();
+        sampleCustomer.setId(10);
+        sampleCustomer.setFirstName("Bob");
+        sampleCustomer.setLastName("Smith");
+
+        samplePet = new Pet();
+        samplePet.setPetId(5);
+        samplePet.setName("Buddy");
+
         sampleTransaction = new Transaction();
         sampleTransaction.setId(1);
-        sampleTransaction.setCustomerId(10);
-        sampleTransaction.setPetId(5);
+        sampleTransaction.setCustomer(sampleCustomer);
+        sampleTransaction.setPet(samplePet);
         sampleTransaction.setAmount(5000.0);
         sampleTransaction.setTransactionDate(LocalDate.now());
         sampleTransaction.setStatus(Transaction.Status.Success);
     }
 
     @Test
-    @DisplayName("createOrder sets Success status for amount < 10000")
-    void createOrder_lowAmount_setsSuccess() {
-        Map<String, Object> payload = Map.of(
-                "customerId", 10,
-                "petId", 5,
-                "amount", 5000.0
-        );
+    @DisplayName("createOrder sets Success status from request payload")
+    void createOrder_successStatus_createsTransaction() {
+        TransactionRequestDTO payload = request(10, 5, 5000.0, "Success");
+
+        when(customerRepository.findById(10)).thenReturn(Optional.of(sampleCustomer));
+        when(petRepository.findById(5)).thenReturn(Optional.of(samplePet));
 
         when(repo.save(any(Transaction.class))).thenAnswer(inv -> {
             Transaction t = inv.getArgument(0);
@@ -65,13 +83,12 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("createOrder sets Failed status for amount >= 10000")
-    void createOrder_highAmount_setsFailed() {
-        Map<String, Object> payload = Map.of(
-                "customerId", 10,
-                "petId", 5,
-                "amount", 15000.0
-        );
+    @DisplayName("createOrder sets Failed status from request payload")
+    void createOrder_failedStatus_createsTransaction() {
+        TransactionRequestDTO payload = request(10, 5, 15000.0, "Failed");
+
+        when(customerRepository.findById(10)).thenReturn(Optional.of(sampleCustomer));
+        when(petRepository.findById(5)).thenReturn(Optional.of(samplePet));
 
         when(repo.save(any(Transaction.class))).thenAnswer(inv -> {
             Transaction t = inv.getArgument(0);
@@ -85,44 +102,41 @@ class TransactionServiceTest {
     }
 
     @Test
-    @DisplayName("createOrder sets Failed status for amount exactly 10000")
-    void createOrder_exactBoundary_setsFailed() {
-        Map<String, Object> payload = Map.of(
-                "customerId", 1,
-                "petId", 1,
-                "amount", 10000.0
-        );
+    @DisplayName("createOrder throws exception when customer does not exist")
+    void createOrder_missingCustomer_throwsException() {
+        TransactionRequestDTO payload = request(99, 5, 10000.0, "Success");
 
-        when(repo.save(any(Transaction.class))).thenAnswer(inv -> {
-            Transaction t = inv.getArgument(0);
-            t.setId(3);
-            return t;
-        });
+        when(customerRepository.findById(99)).thenReturn(Optional.empty());
 
-        TransactionDTO result = transactionService.createOrder(payload);
-
-        assertThat(result.getStatus()).isEqualTo("Failed");
+        assertThatThrownBy(() -> transactionService.createOrder(payload))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Customer not found with id: 99");
     }
 
     @Test
-    @DisplayName("createOrder uses explicit status from payload when provided")
-    void createOrder_withExplicitStatus_usesPayloadStatus() {
-        Map<String, Object> payload = Map.of(
-                "customerId", 1,
-                "petId", 1,
-                "amount", 500.0,
-                "status", "failed"
-        );
+    @DisplayName("createOrder throws exception when pet does not exist")
+    void createOrder_missingPet_throwsException() {
+        TransactionRequestDTO payload = request(10, 99, 10000.0, "Success");
 
-        when(repo.save(any(Transaction.class))).thenAnswer(inv -> {
-            Transaction t = inv.getArgument(0);
-            t.setId(4);
-            return t;
-        });
+        when(customerRepository.findById(10)).thenReturn(Optional.of(sampleCustomer));
+        when(petRepository.findById(99)).thenReturn(Optional.empty());
 
-        TransactionDTO result = transactionService.createOrder(payload);
+        assertThatThrownBy(() -> transactionService.createOrder(payload))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Pet not found with id: 99");
+    }
 
-        assertThat(result.getStatus()).isEqualTo("Failed");
+    @Test
+    @DisplayName("createOrder throws exception for invalid status")
+    void createOrder_withInvalidStatus_throwsException() {
+        TransactionRequestDTO payload = request(10, 5, 500.0, "Pending");
+
+        when(customerRepository.findById(10)).thenReturn(Optional.of(sampleCustomer));
+        when(petRepository.findById(5)).thenReturn(Optional.of(samplePet));
+
+        assertThatThrownBy(() -> transactionService.createOrder(payload))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Status must be either 'Success' or 'Failed'");
     }
 
     @Test
@@ -154,9 +168,13 @@ class TransactionServiceTest {
     @DisplayName("getAllTransactions returns list of DTOs")
     void getAllTransactions_returnsList() {
         Transaction second = new Transaction();
+        Customer secondCustomer = new Customer();
+        secondCustomer.setId(20);
+        Pet secondPet = new Pet();
+        secondPet.setPetId(8);
         second.setId(2);
-        second.setCustomerId(20);
-        second.setPetId(8);
+        second.setCustomer(secondCustomer);
+        second.setPet(secondPet);
         second.setAmount(8000.0);
         second.setTransactionDate(LocalDate.now());
         second.setStatus(Transaction.Status.Success);
@@ -175,7 +193,7 @@ class TransactionServiceTest {
     @Test
     @DisplayName("getOrdersByCustomer returns list of DTOs for customer")
     void getOrdersByCustomer_returnsFilteredList() {
-        when(repo.findByCustomerId(10)).thenReturn(List.of(sampleTransaction));
+        when(repo.findByCustomer_Id(10)).thenReturn(List.of(sampleTransaction));
 
         List<TransactionDTO> result = transactionService.getOrdersByCustomer(10);
 
@@ -186,7 +204,7 @@ class TransactionServiceTest {
     @Test
     @DisplayName("getOrdersByCustomer returns empty list when no transactions found")
     void getOrdersByCustomer_noTransactions_returnsEmptyList() {
-        when(repo.findByCustomerId(99)).thenReturn(List.of());
+        when(repo.findByCustomer_Id(99)).thenReturn(List.of());
 
         List<TransactionDTO> result = transactionService.getOrdersByCustomer(99);
 
@@ -196,7 +214,7 @@ class TransactionServiceTest {
     @Test
     @DisplayName("getCustomerSummary returns summary map with correct fields")
     void getCustomerSummary_returnsCorrectSummary() {
-        when(repo.findByCustomerId(10)).thenReturn(List.of(sampleTransaction));
+        when(repo.findByCustomer_Id(10)).thenReturn(List.of(sampleTransaction));
 
         Map<String, Object> summary = transactionService.getCustomerSummary(10);
 
@@ -211,9 +229,10 @@ class TransactionServiceTest {
     @DisplayName("updateStatus changes status to Failed")
     void updateStatus_toFailed_updatesCorrectly() {
         when(repo.findById(1)).thenReturn(Optional.of(sampleTransaction));
-        when(repo.save(any(Transaction.class))).thenReturn(sampleTransaction);
+        when(repo.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Map<String, Object> payload = Map.of("status", "failed");
+        TransactionStatusUpdateDTO payload = new TransactionStatusUpdateDTO();
+        payload.setStatus("failed");
         TransactionDTO result = transactionService.updateStatus(1, payload);
 
         assertThat(result.getStatus()).isEqualTo("Failed");
@@ -225,8 +244,20 @@ class TransactionServiceTest {
     void updateStatus_notFound_throwsException() {
         when(repo.findById(99)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transactionService.updateStatus(99, Map.of("status", "success")))
+        TransactionStatusUpdateDTO payload = new TransactionStatusUpdateDTO();
+        payload.setStatus("success");
+
+        assertThatThrownBy(() -> transactionService.updateStatus(99, payload))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Transaction not found");
+    }
+
+    private TransactionRequestDTO request(int customerId, int petId, double amount, String status) {
+        TransactionRequestDTO request = new TransactionRequestDTO();
+        request.setCustomerId(customerId);
+        request.setPetId(petId);
+        request.setAmount(amount);
+        request.setStatus(status);
+        return request;
     }
 }

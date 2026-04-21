@@ -1,22 +1,17 @@
 package com.petshop.controller;
 
 import com.petshop.entity.Employee;
-import com.petshop.entity.Pet;
 import com.petshop.entity.PetFood;
 import com.petshop.entity.Supplier;
-import com.petshop.exception.ResourceNotFoundException;
-import com.petshop.repository.EmployeeRepository;
-import com.petshop.repository.PetFoodRepository;
-import com.petshop.repository.PetRepository;
-import com.petshop.repository.SupplierRepository;
-import org.springframework.web.bind.annotation.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.petshop.service.InventoryService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.petshop.service.*;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 

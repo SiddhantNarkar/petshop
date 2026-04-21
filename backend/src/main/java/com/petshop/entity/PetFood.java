@@ -1,7 +1,6 @@
 package com.petshop.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.petshop.entity.Pet;
 import jakarta.persistence.*;
 import java.util.Set;
 
